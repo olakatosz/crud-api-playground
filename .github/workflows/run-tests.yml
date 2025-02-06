@@ -14,7 +14,7 @@ jobs:
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -36,11 +36,12 @@ jobs:
       - name: Run Robot Framework Tests
         run: |
           source venv/bin/activate
-          robot tests/api_tests.robot
+          robot --outputdir results tests/api_tests.robot
 
-      - name: Upload Test Results (Optional)
-        uses: actions/upload-artifact@v3
+      - name: Upload Test Results
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: robot-test-results
           path: results/
+          retention-days: 7 # Keep test results for 7 days
