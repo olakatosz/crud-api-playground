@@ -1,0 +1,23 @@
+# Virtual environment
+venv/
+.env
+*.pyc
+__pycache__/
+*.pyo
+*.pyd
+
+# Python dependencies
+pip-log.txt
+pip-delete-this-directory.txt
+
+# FastAPI/Uvicorn logs
+*.log
+
+# Robot Framework reports & logs
+output.xml
+log.html
+report.html
+*.png  # Screenshots from failed tests
+
+# OS-specific files
+.DS_Store
