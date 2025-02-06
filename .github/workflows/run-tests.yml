@@ -1,0 +1,46 @@
+name: Run Robot Framework Tests
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      - name: Install Dependencies
+        run: |
+          python -m venv venv
+          source venv/bin/activate
+          pip install -r requirements.txt
+
+      - name: Start FastAPI Application
+        run: |
+          source venv/bin/activate
+          uvicorn main:app --host 0.0.0.0 --port 8000 &
+          sleep 5  # Give the server time to start
+
+      - name: Run Robot Framework Tests
+        run: |
+          source venv/bin/activate
+          robot tests/api_tests.robot
+
+      - name: Upload Test Results (Optional)
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: robot-test-results
+          path: results/
