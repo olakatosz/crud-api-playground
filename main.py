@@ -1,4 +1,3 @@
-from typing import Union
 from typing import Dict
 
 from fastapi import FastAPI, HTTPException
@@ -10,52 +9,74 @@ class User(BaseModel):
     job: str
 
 
-users_db: Dict[int, dict] = {}
-user_id_counter = 1
+class UserStore:
+    def __init__(self):
+        self.users_db: Dict[int, dict] = {}
+        self.user_id_counter = 1
 
+    def get_users(self):
+        return self.users_db
+
+    def create_user(self, user: User):
+        user_id = self.user_id_counter
+        self.users_db[user_id] = {"id": user_id,
+                                  "name": user.name, "job": user.job}
+        self.user_id_counter += 1
+        return self.users_db[user_id]
+
+    def update_user(self, user_id: int, user: User):
+        if user_id in self.users_db:
+            self.users_db[user_id] = {"id": user_id,
+                                      "name": user.name, "job": user.job}
+            return self.users_db[user_id]
+        raise HTTPException(status_code=404, detail="User not found")
+
+    def get_user(self, user_id: int):
+        if user_id in self.users_db:
+            return self.users_db[user_id]
+        raise HTTPException(status_code=404, detail="User not found")
+
+    def delete_user(self, user_id: int):
+        if user_id in self.users_db:
+            del self.users_db[user_id]
+            return {"message": "User deleted"}
+        raise HTTPException(status_code=404, detail="User not found")
+
+    def reset_users(self):
+        self.users_db.clear()
+        self.user_id_counter = 1
+        return {"message": "Test database reset"}
+
+
+user_store = UserStore()
 app = FastAPI()
 
 
 @app.get("/users")
 def get_users():
-    return users_db
+    return user_store.get_users()
 
 
 @app.post("/users")
 def create_user(user: User):
-    global user_id_counter
-    users_db[user_id_counter] = {
-        "id": user_id_counter, "name": user.name, "job": user.job}
-    user_id_counter += 1
-    return users_db[user_id_counter - 1]
+    return user_store.create_user(user)
 
 
 @app.put("/users/{user_id}")
 def update_user(user_id: int, user: User):
-    if user_id in users_db:
-        users_db[user_id] = {"id": user_id, "name": user.name, "job": user.job}
-        return users_db[user_id]
-    raise HTTPException(status_code=404, detail="User not found")
+    return user_store.update_user(user_id, user)
 
 
 @app.get("/users/{user_id}")
 def get_user(user_id: int):
-    if user_id in users_db:
-        return users_db[user_id]
-    raise HTTPException(status_code=404, detail="User not found")
+    return user_store.get_user(user_id)
 
 
 @app.delete("/users/{user_id}")
 def delete_user(user_id: int):
-    if user_id in users_db:
-        del users_db[user_id]
-        return {"message": "User deleted"}
-    raise HTTPException(status_code=404, detail="User not found")
+    return user_store.delete_user(user_id)
 
 
 @app.delete("/reset-users")
 def reset_users():
-    global users_db, user_id_counter
-    users_db = {}
-    user_id_counter = 1
-    return {"message": "Test database reset"}
+    return user_store.reset_users()
