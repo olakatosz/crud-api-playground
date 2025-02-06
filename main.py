@@ -38,6 +38,13 @@ def update_user(user_id: int, user: User):
     raise HTTPException(status_code=404, detail="User not found")
 
 
+@app.get("/users/{user_id}")
+def get_user(user_id: int):
+    if user_id in users_db:
+        return users_db[user_id]
+    raise HTTPException(status_code=404, detail="User not found")
+
+
 @app.delete("/users/{user_id}")
 def delete_user(user_id: int):
     if user_id in users_db:

@@ -34,6 +34,12 @@ Get Users
     Dictionary Should Contain Item    ${user_data}    name    John Doe
     Dictionary Should Contain Item    ${user_data}    job    QA Engineer
 
+Check if 404 is thrown when User does not exist
+    Create Session    myapi    ${BASE_URL}
+    ${response}    GET On Session    myapi    /users/9999    expected_status=ANY
+    Run Keyword And Continue On Failure    Should Be Equal As Numbers    ${response.status_code}    404
+    Log    Response: ${response.json()}
+
 
 *** Keywords ***
 Setup Test Data
